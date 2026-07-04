@@ -31,6 +31,23 @@ app.get("/", (req, res) => {
     });
 });
 
+app.get("/api/flags", async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT * FROM flags;"
+        );
+
+        res.json(result.rows);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to retrieve flags."
+        });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
