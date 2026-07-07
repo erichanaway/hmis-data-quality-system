@@ -5,7 +5,15 @@ function App() {
   const [flags, setFlags] = useState([])
 
   useEffect(() => {
-    console.log("Component loaded")
+    async function fetchFlags() {
+      const response = await fetch("http://localhost:5000/api/flags")
+
+      const data = await response.json()
+
+      setFlags(data)
+    }
+
+    fetchFlags()
   }, [])
 
   return (
