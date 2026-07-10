@@ -1,11 +1,18 @@
+import { runRules } from "./rules/index.js";
+import { mapRow } from "./mappers/fakeMapper.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import pool from "./db.js";
-
+import multer from "multer";
+import xlsx from "xlsx";
 dotenv.config();
 
 const app = express();
+
+const upload = multer({
+    dest: "uploads/"
+});
 
 app.use(cors());
 app.use(express.json());
@@ -46,6 +53,27 @@ app.get("/api/flags", async (req, res) => {
             error: "Failed to retrieve flags."
         });
     }
+});
+
+app.post("/api/upload", upload.single("file"), (req,res) => {
+    
+    const workbook = xlsx.readFile(req.file.path);
+
+    const sheetName = workbook.SheetNames[0];
+
+    const worksheet = workbook.Sheets[sheetName];
+
+    const rows = xlsx.utils.sheet_to_json(worksheet);
+
+    const mappedRows = rows.map(mapRow);
+
+    const flags = runRules(mappedRows);
+
+    console.log(flags);
+
+    res.json({
+        message: "upload route works!"
+    });
 });
 
 const PORT = process.env.PORT || 5000;
