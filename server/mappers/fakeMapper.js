@@ -1,5 +1,7 @@
-export function mapRow(row) {
+export function mapRow(row, index) {
     return {
+        excel_row: index + 2,
+
         client_id: row["Client ID"],
         intake_id: row["Intake ID"],
 
@@ -26,6 +28,6 @@ export function mapRow(row) {
 
         head_of_household: row["Head of Household"],
 
-        user: row["User"]
+        entered_by: row["User"]
     };
 }

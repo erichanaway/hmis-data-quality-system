@@ -55,25 +55,42 @@ app.get("/api/flags", async (req, res) => {
     }
 });
 
-app.post("/api/upload", upload.single("file"), (req,res) => {
-    
-    const workbook = xlsx.readFile(req.file.path);
+app.post("/api/upload", upload.single("workbook"), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                error: "No workbook was uploaded."
+            });
+        }
 
-    const sheetName = workbook.SheetNames[0];
+        const workbook = xlsx.readFile(req.file.path);
 
-    const worksheet = workbook.Sheets[sheetName];
+        const sheetName = workbook.SheetNames[0];
 
-    const rows = xlsx.utils.sheet_to_json(worksheet);
+        const worksheet = workbook.Sheets[sheetName];
 
-    const mappedRows = rows.map(mapRow);
+        const rows = xlsx.utils.sheet_to_json(worksheet);
 
-    const flags = runRules(mappedRows);
+        const mappedRows = rows.map(mapRow);
 
-    console.log(flags);
+        const flags = runRules(mappedRows);
 
-    res.json({
-        message: "upload route works!"
-    });
+        console.log(flags[0]);
+
+        res.json({
+            message: "Workbook analyzed successfully.",
+            rowsChecked: mappedRows.length,
+            rulesLoaded: 1,
+            flagsGenerated: flags.length
+        });
+
+    } catch (error) {
+        console.error("Upload processing failed:", error);
+
+        res.status(500).json({
+            error: "Failed to analyze workbook."
+        });
+    }
 });
 
 const PORT = process.env.PORT || 5000;
